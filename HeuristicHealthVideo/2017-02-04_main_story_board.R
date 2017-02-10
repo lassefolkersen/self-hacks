@@ -1,5 +1,7 @@
 rm(list=ls())
-maxComplexity<-10
+maxComplexity<-1
+test<-F
+
 dev.off()
 
 source("3Dstrings/2011-02-21_plotting_functions.R")
@@ -15,11 +17,22 @@ DNA_structure<-loadPDFfile("3Dstrings/pdb425d.ent")
 #define camera angle
 slideNo <-"00"
 steps<-80
-xLeft<-seq(-28,-30,length.out=steps)
-xRight<-seq(-18,0,length.out=steps)
-yBottom<-seq(32,20,length.out=steps)
-yTop<-seq(42,50,length.out=steps)
+# xLeft<-seq(-28,-30,length.out=steps)
+# xRight<-seq(-18,0,length.out=steps)
+# yBottom<-seq(32,20,length.out=steps)
+# yTop<-seq(42,50,length.out=steps)
 
+
+xLeft<-seq(-28,-40,length.out=steps)
+xRight<-seq(-18,-10,length.out=steps)
+yBottom<-seq(32,10,length.out=steps)
+yTop<-seq(42,40,length.out=steps)
+
+
+
+
+rotation<-seq(-2*pi,0,length.out=steps)
+textFade <- c(rep(0,floor(steps*0.7)),seq(0,1,length.out=ceiling(steps*0.3)))
 
 #loop through camera views
 for(i in 1:steps){
@@ -34,14 +47,18 @@ for(i in 1:steps){
   plot.default(x=NULL,y=NULL,xlim=c(xLeft[i],xRight[i]),ylim=c(yBottom[i],yTop[i]),frame.plot=FALSE,axes=FALSE,xlab=" ",ylab=" ")
   
   #plot DNA string
+  from<-c(197.839520,   1.049469, 376.255001)
   from<-c(214.59189, -10.76897, 400.00000)
   to<-c(50, -330, 400)
   rotationPoint<-c(124, -260, 100)
-  outPoint2<-drawDnaString(from,to,rotationPoint=rotationPoint,maxComplexity=maxComplexity,test=F,structure=DNA_structure,sequence="ACTGACAAA")
+  DNA_structure_here<-rotateStructure(DNA_structure, rotationAngle=rotation[i],rotationAxis=c(1,0,0))
+  
+  
+  outPoint2<-drawDnaString(from,to,rotationPoint=rotationPoint,maxComplexity=maxComplexity,test=test,structure=DNA_structure_here,sequence="ACTGACAAA")
   
   #add the letters
-  x1<- -28
-  x2<- -14
+  x1<- -30
+  x2<- -16
   y1<- 20
   y2<- 48
   bases<-39
@@ -53,9 +70,8 @@ for(i in 1:steps){
     xHere<-x1 + (x2-x1) * (j / bases)
     yHere<-y1 + (y2-y1) * (j / bases)
     
-    # c1<-rgb(r=(i / steps),g=(i / steps),b=(i / steps))
-    
-    text(x=xHere,y=yHere,label=sequence[j],col="black")
+    col_1<-rgb(r=textFade[i],g=textFade[i],b=textFade[i])
+    text(x=xHere,y=yHere,label=sequence[j],col=col_1)
   }
     
   
@@ -70,14 +86,42 @@ for(i in 1:steps){
 #slide 1 -> 2
 ###########################
 
-
 #define camera angle
 slideNo <-"01"
 steps<-80
-xLeft<-seq(-30,-100,length.out=steps)
-xRight<-seq(0,30,length.out=steps)
-yBottom<-seq(20,-50,length.out=steps)
-yTop<-seq(50,90,length.out=steps)
+xLeft<-seq(-40,-100,length.out=steps)
+xRight<-seq(-10,30,length.out=steps)
+yBottom<-seq(10,-50,length.out=steps)
+yTop<-seq(40,90,length.out=steps)
+
+
+dev.off()
+point0X <- seq(600,600,length.out=steps)
+point0Y <- seq(-20,-20,length.out=steps)
+point0Z <- seq(400,400,length.out=steps)
+point1X <- seq(200,200,length.out=steps)
+point1Y <- seq(-20,-20,length.out=steps)
+Rpoint1X<- seq(400,400,length.out=steps)
+Rpoint1Y<- seq(-320,-320,length.out=steps)
+
+
+point2X <- seq(50,50,length.out=steps)
+point2Y <- seq(-330,-330,length.out=steps)
+Rpoint2X<- seq(124,124,length.out=steps)
+Rpoint2Y<- seq(-260,-260,length.out=steps)
+
+
+point3X <- seq(-72,-52,length.out=steps)
+point3Y <- seq(-524,-324,length.out=steps)
+Rpoint3X<- seq(-900,0,length.out=steps)
+Rpoint3Y<- seq(-519,-319,length.out=steps)
+
+
+point4X <- seq(-714,-214,length.out=steps)
+point4Y <- seq(-1810,-10,length.out=steps)
+Rpoint4X<- seq(-424,-124,length.out=steps)
+Rpoint4Y<- seq(-760,-260,length.out=steps)
+
 
 #define bell curve
 x<- seq(-10,10,by=0.1)
@@ -88,8 +132,6 @@ bellCurve<-data.frame(
   z=as.numeric(rep(0,length(x))),
   col="grey90"
 )
-
-
 #loop through camera views
 for(i in 1:steps){
   if(nchar(i)==1){
@@ -101,32 +143,43 @@ for(i in 1:steps){
   
   
   plot.default(x=NULL,y=NULL,xlim=c(xLeft[i],xRight[i]),ylim=c(yBottom[i],yTop[i]),frame.plot=FALSE,axes=FALSE,xlab=" ",ylab=" ")
-
+    
     #template for bellCurve
     # plotStructure(bellCurve, maxComplexity=maxComplexity,colorType="predefined")  
-
-    #drawing the DNA ball-curve    
-    from<-c( 600, -20, 400)
-    to<-c(200, -20, 400)
-    rotationPoint<-c(400, -320, 400)
-    outPoint1<-drawDnaString(from,to,rotationPoint=rotationPoint,maxComplexity=maxComplexity,test=F,structure=DNA_structure,sequence="ACTGACAAA")
     
-    from<-outPoint1[["endPoint"]]
-    to<-c(50, -330, 400)
-    rotationPoint<-c(124, -260, 100)
-    outPoint2<-drawDnaString(from,to,rotationPoint=rotationPoint,maxComplexity=maxComplexity,test=F,structure=DNA_structure,sequence="ACTGACAAA")
-    
-    
-    from<-outPoint2[["endPoint"]] #this is the summit
-    to<-c(-52, -324, 400)
-    rotationPoint<-c(0, -319, 400)
-    outPoint3<-drawDnaString(from,to,rotationPoint=rotationPoint,maxComplexity=maxComplexity,test=F,structure=DNA_structure,sequence="ACTGACAAA")
   
-    from<-outPoint3[["endPoint"]]
-    to<-c(-214, -10, 400)
-    rotationPoint<-c(-124, -260, 100)
-    outPoint4<-drawDnaString(from,to,rotationPoint=rotationPoint,maxComplexity=maxComplexity,test=F,structure=DNA_structure,sequence="ACTGACAAA")
+    #drawing the DNA bell-curve    
+    # from<-c( 600, -20, 400)
+    # to<-c(200, -20, 400)
+    # rotationPoint<-c(400, -320, 400)
+    from <- c(point0X[i], point0Y[i], point0Z[i])
+    to <- c(point1X[i], point1Y[i], 400)
+    rotationPoint<-c(Rpoint1X[i], Rpoint1Y[i], 400)
+    outPoint1<-drawDnaString(from,to,rotationPoint=rotationPoint,maxComplexity=maxComplexity,structure=DNA_structure,sequence="ACTGACAAA",test=T)
+
+    from<-outPoint1[["endPoint"]] 
+    # to<-c(50, -330, 400)
+    # rotationPoint<-c(124, -260, 100)
+    to <- c(point2X[i], point2Y[i], 400)
+    rotationPoint<-c(Rpoint2X[i], Rpoint2Y[i], 100)
+    outPoint2<-drawDnaString(from,to,rotationPoint=rotationPoint,maxComplexity=maxComplexity,structure=DNA_structure,sequence="ACTGACAAA",test=test)
     
+    
+    #this is the summit
+    from<-outPoint2[["endPoint"]] 
+    # to<-c(-52, -324, 400)
+    # rotationPoint<-c(0, -319, 400)
+    to <- c(point3X[i], point3Y[i], 400)
+    rotationPoint<-c(Rpoint3X[i], Rpoint3Y[i], 400)
+    outPoint3<-drawDnaString(from,to,rotationPoint=rotationPoint,maxComplexity=maxComplexity,structure=DNA_structure,sequence="ACTGACAAA",test=test)
+  
+    from<-outPoint3[["endPoint"]] 
+    # to<-c(-214, -10, 400)
+    # rotationPoint<-c(-124, -260, 100)
+    to <- c(point4X[i], point4Y[i], 400)
+    rotationPoint<-c(Rpoint4X[i], Rpoint4Y[i], 100)
+    outPoint4<-drawDnaString(from,to,rotationPoint=rotationPoint,maxComplexity=maxComplexity,structure=DNA_structure,sequence="ACTGACAAA",test=test)
+
   
   # Sys.sleep(1)
   print(i)
@@ -145,6 +198,7 @@ xLeft<-seq(-100,0,length.out=steps)
 xRight<-seq(30,130,length.out=steps)
 yBottom<-seq(-50,-50,length.out=steps)
 yTop<-seq(90,90,length.out=steps)
+
 
 healthyCol<-rgb(r=seq(229,0,length.out=steps),g=seq(229,0,length.out=steps),b=seq(229,255,length.out=steps),maxColorValue=255)
 sickCol<-rgb(r=seq(255,255,length.out=steps),g=seq(255,0,length.out=steps),b=seq(255,0,length.out=steps),alpha=seq(255,0,length.out=steps),maxColorValue=255)
