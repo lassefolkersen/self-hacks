@@ -1,8 +1,8 @@
 rm(list=ls())
-maxComplexity<-1
+maxComplexity<-10
 test<-F
-
 dev.off()
+
 
 source("3Dstrings/2011-02-21_plotting_functions.R")
 DNA_structure<-loadPDFfile("3Dstrings/pdb425d.ent")
@@ -17,12 +17,6 @@ DNA_structure<-loadPDFfile("3Dstrings/pdb425d.ent")
 #define camera angle
 slideNo <-"00"
 steps<-80
-# xLeft<-seq(-28,-30,length.out=steps)
-# xRight<-seq(-18,0,length.out=steps)
-# yBottom<-seq(32,20,length.out=steps)
-# yTop<-seq(42,50,length.out=steps)
-
-
 xLeft<-seq(-28,-40,length.out=steps)
 xRight<-seq(-18,-10,length.out=steps)
 yBottom<-seq(32,10,length.out=steps)
@@ -32,7 +26,9 @@ yTop<-seq(42,40,length.out=steps)
 
 
 rotation<-seq(-2*pi,0,length.out=steps)
-textFade <- c(rep(0,floor(steps*0.7)),seq(0,1,length.out=ceiling(steps*0.3)))
+textFade <- c(rep(0,floor(steps*0.5)),seq(0,1,length.out=ceiling(steps*0.3)),rep(1,floor(steps*0.2)))
+
+
 
 #loop through camera views
 for(i in 1:steps){
@@ -51,17 +47,19 @@ for(i in 1:steps){
   from<-c(214.59189, -10.76897, 400.00000)
   to<-c(50, -330, 400)
   rotationPoint<-c(124, -260, 100)
-  DNA_structure_here<-rotateStructure(DNA_structure, rotationAngle=rotation[i],rotationAxis=c(1,0,0))
+
   
+  DNA_structure_here<-rotateStructure(DNA_structure, rotationAngle=rotation[i],rotationAxis=c(1,0,0),rotationPoint=c(2,31.5,0.3))
   
   outPoint2<-drawDnaString(from,to,rotationPoint=rotationPoint,maxComplexity=maxComplexity,test=test,structure=DNA_structure_here,sequence="ACTGACAAA")
   
+  
   #add the letters
-  x1<- -30
-  x2<- -16
-  y1<- 20
+  x1<- -42 #+ (i/steps)*5
+  x2<- -14#+ (i/steps)*5
+  y1<- -8
   y2<- 48
-  bases<-39
+  bases<-78
   sequence <- strsplit("TGACAAAAC","")[[1]]
   sequence<-rep(sequence,length.out=bases)
   
@@ -155,7 +153,7 @@ for(i in 1:steps){
     from <- c(point0X[i], point0Y[i], point0Z[i])
     to <- c(point1X[i], point1Y[i], 400)
     rotationPoint<-c(Rpoint1X[i], Rpoint1Y[i], 400)
-    outPoint1<-drawDnaString(from,to,rotationPoint=rotationPoint,maxComplexity=maxComplexity,structure=DNA_structure,sequence="ACTGACAAA",test=T)
+    outPoint1<-drawDnaString(from,to,rotationPoint=rotationPoint,maxComplexity=maxComplexity,structure=DNA_structure,sequence="ACTGACAAA",test=test)
 
     from<-outPoint1[["endPoint"]] 
     # to<-c(50, -330, 400)
@@ -181,7 +179,6 @@ for(i in 1:steps){
     outPoint4<-drawDnaString(from,to,rotationPoint=rotationPoint,maxComplexity=maxComplexity,structure=DNA_structure,sequence="ACTGACAAA",test=test)
 
   
-  # Sys.sleep(1)
   print(i)
   dev.off()
 }
