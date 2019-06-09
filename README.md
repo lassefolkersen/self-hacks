@@ -10,7 +10,7 @@ This is an old project were I made some scripts for 3D plotting, particular 3D p
 Illustrating running and other training. Reason: finally passed 5000 km
 
 
-![run](trainingtime/2016-11-17_run_times.jpg?raw=true)
+![run](trainingtime/2019-06-10_run_times.jpg?raw=true)
 
 
 

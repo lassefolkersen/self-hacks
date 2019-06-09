@@ -222,3 +222,268 @@ for(i in levels(run[,"bin"])){
 
 
 dev.off()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#2019-06-09_update all
+rm(list=ls())
+setwd("C:/Users/Lasse/Documents/Personal/Diverse/Træning/")
+file<-file("2019-06-09_calendar_dump.ics","r")
+t<-readLines(file)
+close(file)
+entries<-grep("^BEGIN",t)
+trainings<-data.frame(summary=vector(),date=vector(),stringsAsFactors=FALSE)
+for(entry in entries){
+  print(entry)
+  sumHere<-tHere<-NA
+  endNotFound<-TRUE
+  i<-0
+  while(endNotFound){
+    if(i>200)stop("i too high")
+    
+    i<-i+1	
+    if(length(grep("^END",t[i+entry]))!=0){
+      endNotFound<-FALSE
+    }
+  }
+  for(j in (entry):(entry+i)){
+    if(length(grep("^SUMMARY",t[j]))!=0){
+      if(length(grep("^summary\\:training",tolower(t[j])))!=0){
+        sumHere<-sub("^SUMMARY\\:","",t[j])
+        for(k in (entry):(entry+i)){
+          if(length(grep("^DTSTART",t[k]))!=0){
+            tHere<-as.Date(sub("^DTSTART;VALUE=DATE\\:","",t[k]),format="%Y%m%d")
+            break
+          }
+        }
+        trainings<-rbind(trainings,data.frame(summary=sumHere,date=tHere,stringsAsFactors=FALSE))
+      }
+    }
+  }
+}
+
+
+
+
+#this is the all traing -file now -- but because of prior curation, we take the previous version and use it replace all entries before the last one in that
+data<-read.table("2016-11-13 complete training 2007-2016.xls",sep="\t",stringsAsFactors=FALSE,header=TRUE,comment.char = "",quote = "")
+
+
+#insert some manual look ups in prior data that I just saw
+data[1211,"date"] <- "2015-03-08"
+data[1208,"date"] <- "2013-09-15"
+data[1210,"date"] <- "2014-11-15"
+data[1212,"date"] <- "2015-03-15"
+data <- data[!is.na(data[,"date"]),] #will throw out one
+data<-data[order(data[,"date"]),]
+
+
+#then get the post 2016-11-13 trainings
+trainings<-trainings[which(as.Date(trainings[,"date"]) > as.Date("2016-11-13")) ,]
+nrow(trainings)
+# 376 trainings since that date. ok...
+
+
+trainings[271,"summary"] <- "Training swim 1.0 km NA #in sea off greece"
+
+#categorizing
+noApprox<-sub("~","",trainings[,"summary"])
+lowerCase<-tolower(noApprox)
+noPrefix<-sub("^training ","",lowerCase)
+noNumber<-sub(" [0-9].+$","",noPrefix)
+noNA<-sub(" na .+$","",noNumber)
+noComment <- sub(" #.+$","",noNA)
+type<-gsub(" ","",noComment)
+table(type)
+trainings[,"type"]<-type
+unique(type)
+# [1] "dj"             "run"            "yoga"           "bicycle"        "mountaineering" "ski"           
+# [7] "climb"          "climbing"       "swim"           "row"            "crosstrainer"   "bodypump"      
+# [13] "bodycombat"     "cross-trainer" 
+
+#get distance
+distance<-sub(" km.{0,100}$","",tolower(trainings[,"summary"]))
+distance <- sub(" #.+$","",distance)
+distance<-sub("^training [a-z -]+ ","",distance)
+distance[distance%in%c("training tw","training ski","training dj","training badminton","training spinning")]<-NA
+approx<-rep("No",length(distance))
+approx[grep("~",distance)]<-"Yes"
+distance<-sub("~","",distance)
+distance<-sub(":",".",distance)
+distance<-as.numeric(distance)
+trainings[,"distance"]<-distance
+trainings[,"approximate distance"]<-approx
+
+#get time
+time<-sub("^.+km {0,1}","",sub(" #.{0,100}$","",tolower(trainings[,"summary"])))
+time[time%in%c("na","training dj","","training tw","training ski","training badminton","training spinning","training yoga","training mountaineering","training climb","training climbing", "training bodypump","training bodycombat")]<-NA
+time<-sub("min","",sub(" minutes","",sub("min\\.","",time)))
+time<-gsub(":",".",time)
+time<-gsub(" ","",time)
+readTime<-function(x){
+  if(is.na(x))return(x)
+  points<-nchar(gsub("[0-9]","",x))
+  if(points == 0){ return(as.numeric(x))}
+  if(points == 1){ return(as.numeric(x))}
+  if(points == 2){
+    hours<-as.numeric(sub("\\..+$","",x))
+    x<-as.numeric(sub("^.\\.","",x)) + 60*hours
+    return(x)
+  }
+}
+for(i in 1:length(time)){
+  time[i]<-readTime(time[i])
+}
+time<-as.numeric(time)
+trainings[,"time"]<-time
+
+#get comment
+comment<-sub("^.+\\#","",trainings[,"summary"])
+comment[-grep("#",trainings[,"summary"])]<-NA
+comment<-sub("^ ","",comment)
+comment<-gsub("\\\\","",comment)
+trainings[,"comment"]<-comment
+
+#get speed
+speed<-trainings[,"distance"]/(trainings[,"time"]/60)
+trainings[,"speed"]<-speed
+
+#tidy
+trainings[,"summary"]<-NULL
+trainings[,"approximate distance"]<-NULL
+trainings[,"date"] <- as.character(trainings[,"date"])
+
+
+#merge
+trainings<-rbind(data,trainings)
+
+
+#save
+write.table(trainings,file="2019-06-09_trainings_calender_digest.xls",sep="\t",col.names=TRUE,row.names=FALSE,quote=FALSE)
+
+
+
+
+
+#plot cumulative distance
+rm(list=ls())
+data<-read.table("2019-06-09_trainings_calender_digest.xls",sep="\t",stringsAsFactors=FALSE,header=TRUE,comment.char = "",quote = "")
+
+
+#only get runs
+run<-data[data[,"type"]%in%"run",]
+
+
+
+
+#insert average distance for those (~8) missing
+w<-which(is.na(run[,"distance"]))
+run[w,"distance"]<-run[w,"time"] / 4.4 #min/km
+run[w,"speed"]<-run[w,"distance"]/(run[w,"time"]/60)
+
+
+#converting to date and setting cdist to 0
+run[,"date"]<-as.Date(run[,"date"])
+run[,"cdist"]<-0
+
+
+
+
+
+
+for(i in 1:nrow(run)){
+  if(i != 1){
+    run[i,"cdist"]<-run[i-1,"cdist"]
+  }
+  if(!is.na(run[i,"distance"])){
+    run[i,"cdist"]<-run[i,"distance"] + run[i,"cdist"]
+  }
+}
+
+#set colour and size
+run[is.na(run[,"speed"] ),"speed"]<-mean(run[,"speed"],na.rm=T)
+col<-rainbow(11,s=1,v=1,start=0,end=0.15)
+# names(col)<-as.character(min(round(run[,"speed"])):max(round(run[,"speed"])))
+names(col)<-as.character(7:17)
+run[,"cex"]<-(run[,"distance"]/max(run[,"distance"],na.rm=T))*2
+
+
+#main plot function
+pdf("2019-06-09_run_distance.pdf",width=5,height=5)
+
+
+plot(
+  run[,"date"],run[,"cdist"],
+  xlab="",ylab="cumulative distance (km)",
+  col=col[as.character(round(run[,"speed"]))],
+  pch=19,
+  cex=run[,"cex"],
+  main="Running, Lasse"
+)
+
+
+
+#this is the scale for the colour hue
+xl <- min(as.numeric(run[,"date"]),na.rm=T)
+yb <- 3000
+xr <- xl +200
+yt <- 5000
+rect(
+  xl,
+  head(seq(yb,yt,(yt-yb)/9),-1),
+  xr,
+  tail(seq(yb,yt,(yt-yb)/9),-1),
+  col=col[as.character(9:17)]
+)
+text(x = xl +250, y = 150+head(seq(yb,yt,(yt-yb)/8),-1), labels=paste(9:16,"km/h"),cex=0.8,adj=0)
+
+
+#this is the dot-size scale
+run[,"bin"]<-cut(run[,"distance"], breaks=c(0,seq(6,20,2),Inf), labels=seq(5,21,2))
+
+
+xl <- min(as.numeric(run[,"date"]),na.rm=T)+ 365*9
+yb <- -100
+xr <- xl +200
+yt <- 2000
+for(i in levels(run[,"bin"])){
+  s<-(yt-yb)/length(levels(run[,"bin"]))
+  cex<-(as.numeric(i)/max(run[,"distance"],na.rm=T))*2
+  points(x=xl,y=s*which(levels(run[,"bin"])%in%i)+yb,cex=cex,pch=19,col=col["10"]) 
+  text(x=xl+100,y=s*which(levels(run[,"bin"])%in%i)+yb,adj=0, label=paste(i,"km"),cex=0.8)
+}
+
+
+
+dev.off()
+
+
+
