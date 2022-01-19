@@ -32,7 +32,7 @@ save(basefolder,d4,file=paste0(basefolder,"/2022-01-18_import.rdata"))
 
 #clear, load and start over
 rm(list=ls())
-load("2022-01-18_strava_running/export_11355130/2022-01-18_import.rdata")
+load("/Users/lassefolkersen/Documents/Administrative/2022-01-18_strava_running/export_11355130/2022-01-18_import.rdata")
 
 
 #only take runs (no cycling or skating or such)
@@ -70,8 +70,8 @@ for(id in unique(d4[,"id"])){
 # ((300*seconds_per_step)/60)/60 # that's 1.6 hours!
 max_step <- 300
 d4<-d4[d4[,"step"]<max_step,]
-xlim <- range(d4[,"lon_zeroed"])*0.3
-ylim <- range(d4[,"lat_zeroed"])*0.3
+ylim <- range(d4[,"lon_zeroed"])*0.3
+xlim <- range(d4[,"lat_zeroed"])*0.3
 
 
 #omit a few runs where the gps clearly was broken (can use a text function in
@@ -91,8 +91,8 @@ for(j in 1:max_step){
   #plot yellow main dots at step j
   w1<-which(d4[,"step"]%in%j )
   points(
-    x=d4[w1,"lat_zeroed"],
-    y=d4[w1,"lon_zeroed"],
+    x=d4[w1,"lon_zeroed"],
+    y=d4[w1,"lat_zeroed"],
     pch=19,
     col=rgb(255, 255, 0, 90, maxColorValue=256)
   )
@@ -101,8 +101,8 @@ for(j in 1:max_step){
   #set trails
   w2<-which(d4[,"step"]<=j)
   points(
-    x=d4[w2,"lat_zeroed"],
-    y=d4[w2,"lon_zeroed"],
+    x=d4[w2,"lon_zeroed"],
+    y=d4[w2,"lat_zeroed"],
     pch=19,
     cex=0.2,
     col=  rgb(255, 255, 167, 30, maxColorValue=256)

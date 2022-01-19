@@ -20,3 +20,10 @@ Illustrating running and other training. Reason: finally passed 5000 km
 ![run](bornehavehentetider/2016-11-25_Nellie_picking_time.png?raw=true)
 
 Answer: we do (P=0.0065)
+
+
+
+# Project 3 -- strava routes 
+Animation-plot of running routes. Go to strava and request the bulk download of your running data, then run the script to parse the xml and plot it.
+![routes](strava_routes/2022-01-19_plots/38.png?raw=true)
+Finished video: [link](strava_routes/2022-01-19_plots/løbeture.mp4)
