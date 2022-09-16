@@ -29,3 +29,15 @@ Animation-plot of running routes. Go to strava and request the bulk download of 
 ![routes](strava_routes/2022-01-19_plots/38.png?raw=true)
 
 Finished video: [link](strava_routes/2022-01-19_plots/Løbeture.mp4)
+
+
+
+# Project 4 -- Wordfinder puzzle
+Homework for the child-1, find a 100 English words in a 35 by 35 grid. Score break-down:
+* first 21 found by child-1
+* next 55 found by v1 algorithm (no diagonal up finder + few edge-bugs)
+* next 5 found by mother, manually
+* next 18 found by v2 algorithm (added coarse diagonal up finder)
+* the last one, shelf, was found by grandmother-1 via chat-group! (edge-bug prevented the algorithm)
+
+![puzzle](wordfinder-homework/1663325481219.jpg?raw=true)
